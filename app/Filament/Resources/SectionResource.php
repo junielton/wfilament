@@ -24,7 +24,7 @@ class SectionResource extends Resource
             ->schema([
                 Select::make('class_id')
                     ->relationship(name: 'class', titleAttribute: 'name'),
-                TextInput::make('name')
+                TextInput::make('name'),
             ]);
     }
 
@@ -34,7 +34,8 @@ class SectionResource extends Resource
             ->columns([
                 TextColumn::make('id'),
                 TextColumn::make('name'),
-                TextColumn::make('class.name')
+                TextColumn::make('class.name')->label('Class')->badge()
+
             ])
             ->filters([
                 //
