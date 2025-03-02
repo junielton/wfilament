@@ -4,9 +4,10 @@ namespace App\Filament\Resources;
 
 use App\Exports\StudentsExport;
 use App\Filament\Resources\StudentResource\Pages;
-use App\Filament\Resources\StudentResource\RelationManagers;
+use App\Models\Classes;
 use App\Models\Section;
 use App\Models\Student;
+use DeepCopy\Filter\Filter;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -15,9 +16,12 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter as FiltersFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Collection;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Database\Eloquent\Builder;
+
 
 class StudentResource extends Resource
 {
@@ -65,7 +69,38 @@ class StudentResource extends Resource
                 TextColumn::make('section.name')->label('Section')->badge(),
             ])
             ->filters([
-                //
+                FiltersFilter::make('class-section-filter')
+                    ->form([
+                        Select::make('class_id')
+                            ->label('Filter by Class')
+                            ->placeholder('Select a class')
+                            ->options(
+                                Classes::pluck('name', 'id')->toArray(),
+                            ),
+                        Select::make('section_id')
+                            ->label('Filter by Section')
+                            ->placeholder('Select a Section')
+                            ->options(
+                                function (Get $get) {
+                                    $classId = $get('class_id');
+                                    if ($classId) {
+                                        return Section::where('class_id', $classId)
+                                            ->pluck('name', 'id')
+                                            ->toArray();
+                                    }
+                                }
+
+                            ),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        return $query
+                            ->when($data['class_id'], function ($query) use ($data) {
+                                $query->where('class_id', $data['class_id']);
+                            })
+                            ->when($data['section_id'], function ($query) use ($data) {
+                                $query->where('section_id', $data['section_id']);
+                            });
+                    })
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
