@@ -31,6 +31,7 @@ class ClassesResource extends Resource
             ->columns([
                 TextColumn::make('id'),
                 TextColumn::make('name'),
+                TextColumn::make('email'),
             ])
             ->filters([
                 //
