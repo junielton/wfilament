@@ -7,10 +7,12 @@ use App\Models\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Validation\Rules\Unique;
 
 class SectionResource extends Resource
 {
@@ -26,7 +28,10 @@ class SectionResource extends Resource
             ->schema([
                 Select::make('class_id')
                     ->relationship(name: 'class', titleAttribute: 'name'),
-                TextInput::make('name'),
+                TextInput::make('name')
+                    ->unique(ignoreRecord: true, modifyRuleUsing: function (Get $get, Unique $rule) {
+                        return $rule->where('class_id', $get('class_id'));
+                    }),
             ]);
     }
 
@@ -36,7 +41,7 @@ class SectionResource extends Resource
             ->columns([
                 TextColumn::make('id'),
                 TextColumn::make('name'),
-                TextColumn::make('class.name')->label('Class')->badge()
+                TextColumn::make('class.name')->label('Class')->badge(),
 
             ])
             ->filters([
