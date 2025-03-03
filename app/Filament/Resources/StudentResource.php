@@ -7,7 +7,6 @@ use App\Filament\Resources\StudentResource\Pages;
 use App\Models\Classes;
 use App\Models\Section;
 use App\Models\Student;
-use DeepCopy\Filter\Filter;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -15,13 +14,13 @@ use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter as FiltersFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Maatwebsite\Excel\Facades\Excel;
-use Illuminate\Database\Eloquent\Builder;
-
 
 class StudentResource extends Resource
 {
@@ -107,9 +106,15 @@ class StudentResource extends Resource
                             ->when($data['section_id'], function ($query) use ($data) {
                                 $query->where('section_id', $data['section_id']);
                             });
-                    })
+                    }),
             ])
             ->actions([
+                Action::make('downloadPdf')
+                    ->url(fn(Student $student) => route('student.invoice.generate', $student)),
+                Action::make('qrCode')
+                    ->url(function (Student $record) {
+                        return static::getUrl('qrCode', [$record]);
+                    }),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
@@ -121,7 +126,7 @@ class StudentResource extends Resource
                         ->icon('heroicon-o-document-arrow-down')
                         ->action(function (Collection $records) {
                             return Excel::download(new StudentsExport($records), 'students.xlsx');
-                        })
+                        }),
 
                 ]),
             ]);
@@ -140,6 +145,7 @@ class StudentResource extends Resource
             'index' => Pages\ListStudents::route('/'),
             'create' => Pages\CreateStudent::route('/create'),
             'edit' => Pages\EditStudent::route('/{record}/edit'),
+            'qrCode' => Pages\GenerateQrCode::route('/{record}/qrcode'),
         ];
     }
 }
