@@ -4,12 +4,12 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ClassesResource\Pages;
 use App\Models\Classes;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Table;
-use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
 class ClassesResource extends Resource
 {
@@ -24,6 +24,7 @@ class ClassesResource extends Resource
         return $form
             ->schema([
                 TextInput::make('name')
+                    ->unique(ignoreRecord: true),
             ]);
     }
 
