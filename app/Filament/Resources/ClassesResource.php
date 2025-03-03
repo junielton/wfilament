@@ -17,6 +17,8 @@ class ClassesResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    protected static ?string $navigationGroup = 'Academic Management';
+
     public static function form(Form $form): Form
     {
         return $form
@@ -31,7 +33,11 @@ class ClassesResource extends Resource
             ->columns([
                 TextColumn::make('id'),
                 TextColumn::make('name'),
-                TextColumn::make('email'),
+                TextColumn::make('sections.name')
+                    ->badge(),
+                TextColumn::make('students_count')
+                    ->counts('students')
+                    ->badge(),
             ])
             ->filters([
                 //
